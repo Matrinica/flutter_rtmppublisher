@@ -284,6 +284,7 @@ FourCharCode const videoFormat = kCVPixelFormatType_32BGRA;
     [_motionManager startAccelerometerUpdates];
     
     [self setCaptureSessionPreset:_resolutionPreset];
+    [self setStreamingSessionPreset:_streamingPreset];
     return self;
 }
 

@@ -240,7 +240,9 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               : null,
         ),
         IconButton(
-          icon: controller != null && (controller.value.isRecordingPaused || controller.value.isStreamingPaused)
+          icon: controller != null &&
+                  (controller.value.isRecordingPaused ||
+                      controller.value.isStreamingPaused)
               ? Icon(Icons.play_arrow)
               : Icon(Icons.pause),
           color: Colors.blue,
@@ -308,7 +310,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     }
     controller = CameraController(
       cameraDescription,
-      ResolutionPreset.medium,
+      ResolutionPreset.veryHigh,
       enableAudio: enableAudio,
       androidUseOpenGL: useOpenGL,
     );
@@ -467,12 +469,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   Future<void> pauseVideoRecording() async {
     try {
-     if (controller.value.isRecordingVideo) {
-       await controller.pauseVideoRecording();
-     }
-     if (controller.value.isStreamingVideoRtmp) {
-       await controller.pauseVideoStreaming();
-     }
+      if (controller.value.isRecordingVideo) {
+        await controller.pauseVideoRecording();
+      }
+      if (controller.value.isStreamingVideoRtmp) {
+        await controller.pauseVideoStreaming();
+      }
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
@@ -481,12 +483,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   Future<void> resumeVideoRecording() async {
     try {
-     if (controller.value.isRecordingVideo) {
-       await controller.resumeVideoRecording();
-     }
-     if (controller.value.isStreamingVideoRtmp) {
-       await controller.resumeVideoStreaming();
-     }
+      if (controller.value.isRecordingVideo) {
+        await controller.resumeVideoRecording();
+      }
+      if (controller.value.isStreamingVideoRtmp) {
+        await controller.resumeVideoStreaming();
+      }
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
@@ -582,11 +584,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         _timer = null;
       }
       url = myUrl;
-      await controller.startVideoStreaming(url);
-      _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-        var stats = await controller.getStreamStatistics();
-        print(stats);
-      });
+      await controller.startVideoStreaming(url,
+          bitrate: 5 * 1024 * 1024, rotation: 0);
+      // _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      //   var stats = await controller.getStreamStatistics();
+      //   print(stats);
+      // });
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;

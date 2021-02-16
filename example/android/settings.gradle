@@ -1,3 +1,12 @@
+include ':rtsp'
+include ':rtmp'
+include ':encoder'
+include ':rtplibrary'
+project(":rtsp").projectDir = file("../../rtmp-rtsp-stream-client-java/rtsp")
+project(":rtmp").projectDir = file("../../rtmp-rtsp-stream-client-java/rtmp")
+project(":encoder").projectDir = file("../../rtmp-rtsp-stream-client-java/encoder")
+project(":rtplibrary").projectDir = file("../../rtmp-rtsp-stream-client-java/rtplibrary")
+
 include ':app', ':library'
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()

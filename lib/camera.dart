@@ -176,11 +176,12 @@ class CameraPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return controller.value.isInitialized
-        ? controller.value.previewSize.width < controller.value.previewSize.height ?
-        RotatedBox(
-        quarterTurns: controller.value.previewQuarterTurns,
-        child:
-        Texture(textureId: controller._textureId)) : Texture(textureId: controller._textureId)
+        ? controller.value.previewSize.width <
+                controller.value.previewSize.height
+            ? RotatedBox(
+                quarterTurns: controller.value.previewQuarterTurns,
+                child: Texture(textureId: controller._textureId))
+            : Texture(textureId: controller._textureId)
         : Container();
   }
 }
@@ -423,7 +424,8 @@ class CameraController extends ValueNotifier<CameraValue> {
         value = value.copyWith(isStreamingVideoRtmp: false);
         break;
       case 'rotation_update':
-        value = value.copyWith(previewQuarterTurns: int.parse(event['errorDescription']));
+        value = value.copyWith(
+            previewQuarterTurns: int.parse(event['errorDescription']));
         break;
     }
   }
@@ -765,7 +767,9 @@ class CameraController extends ValueNotifier<CameraValue> {
   ///
   /// Throws a [CameraException] if the capture fails.
   Future<void> startVideoStreaming(String url,
-      {int bitrate = 1200 * 1024, bool androidUseOpenGL}) async {
+      {int bitrate = 1200 * 1024,
+      int rotation = 90,
+      bool androidUseOpenGL}) async {
     if (!value.isInitialized || _isDisposed) {
       throw CameraException(
         'Uninitialized CameraController',
@@ -797,6 +801,7 @@ class CameraController extends ValueNotifier<CameraValue> {
         'textureId': _textureId,
         'url': url,
         'bitrate': bitrate,
+        'rotation': rotation,
       });
       value =
           value.copyWith(isStreamingVideoRtmp: true, isStreamingPaused: false);

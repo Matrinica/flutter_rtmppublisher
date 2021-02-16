@@ -54,23 +54,49 @@ public class FlutterRTMPStreaming : NSObject {
         rtmpStream.captureSettings = [
             .fps: 30
         ]
+        rtmpStream.context = CIContext.init()
         rtmpStream.delegate = myDelegate
         self.retries = 0
         // Run this on the ui thread.
         DispatchQueue.main.async {
-            if let orientation = DeviceUtil.videoOrientation(by:  UIApplication.shared.statusBarOrientation) {
-                self.rtmpStream.orientation = orientation
+            if let orientation = DeviceUtil.videoOrientation(by: UIDevice.current.orientation) {
                 print(String(format:"Orient %d", orientation.rawValue))
                 switch (orientation) {
-                case .landscapeLeft, .landscapeRight:
+                case .portrait, .portraitUpsideDown:
                     self.rtmpStream.videoSettings[.width] = height;
-                    self.rtmpStream.videoSettings[.height] = height;
+                    self.rtmpStream.videoSettings[.height] = width;
                     break;
                 default:
                     break;
                 }
+                if (self.rtmpStream.registerVideoEffect(RotationEffect(orientation: orientation))) {
+                    print("Added rotation effect");
+                } else {
+                    print("Failed to add rotation effect");
+                }
             }
             self.rtmpConnection.connect(self.url ?? "frog")
+        }
+    }
+    
+    final class RotationEffect: VideoEffect {
+        private let orientation: AVCaptureVideoOrientation
+
+        init (orientation: AVCaptureVideoOrientation) {
+            self.orientation = orientation
+        }
+        override func execute(_ image: CIImage, info: CMSampleBuffer?) -> CIImage {
+            guard #available(iOS 11.0, *) else {
+                return image
+            }
+            switch orientation {
+            case .landscapeLeft:
+                return image.oriented(.right)
+            case .landscapeRight:
+                return image.oriented(.left)
+            default:
+                return image
+            }
         }
     }
     
@@ -163,19 +189,19 @@ public class FlutterRTMPStreaming : NSObject {
     
     @objc
     public func addVideoData(buffer: CMSampleBuffer) {
-        if let description = CMSampleBufferGetFormatDescription(buffer) {
-            let dimensions = CMVideoFormatDescriptionGetDimensions(description)
-            rtmpStream.videoSettings = [
-                .width: dimensions.width,
-                .height: dimensions.height,
-                .profileLevel: kVTProfileLevel_H264_Baseline_AutoLevel,
-                .maxKeyFrameIntervalDuration: 2,
-                .bitrate: 1200 * 1024
-            ]
-            rtmpStream.captureSettings = [
-                .fps: 24
-            ]
-        }
+//        if let description = CMSampleBufferGetFormatDescription(buffer) {
+//            let dimensions = CMVideoFormatDescriptionGetDimensions(description)
+//            rtmpStream.videoSettings = [
+//                .width: dimensions.width,
+//                .height: dimensions.height,
+//                .profileLevel: kVTProfileLevel_H264_Baseline_AutoLevel,
+//                .maxKeyFrameIntervalDuration: 2,
+//                .bitrate: 1200 * 1024
+//            ]
+//            rtmpStream.captureSettings = [
+//                .fps: 24
+//            ]
+//        }
         rtmpStream.appendSampleBuffer( buffer, withType: .video)
     }
     
@@ -192,8 +218,8 @@ public class FlutterRTMPStreaming : NSObject {
 
 
 class MyRTMPStreamQoSDelagate: RTMPStreamDelegate {
-    let minBitrate: UInt32 = 300 * 1024
-    let maxBitrate: UInt32 = 2500 * 1024
+    let minBitrate: UInt32 = 1024 * 1024
+    let maxBitrate: UInt32 = 5 * 1024 * 1024
     let incrementBitrate: UInt32 = 512 * 1024
     
     func didPublishSufficientBW(_ stream: RTMPStream, withConnection: RTMPConnection) {
